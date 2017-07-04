@@ -34,6 +34,12 @@ func (c CreateReleaseCmd) Run(opts CreateReleaseOpts) (boshrel.Release, error) {
 	var release boshrel.Release
 	var err error
 
+	//// Alternative: checkReleaseForBlobSymlinks and Exit!
+	//if releaseDir.oldStyleSymlinksDetected() {
+	//	os.Exit(2)
+	//}
+
+
 	if manifestGiven {
 		release, err = releaseManifestReader.Read(opts.Args.Manifest.Path)
 		if err != nil {

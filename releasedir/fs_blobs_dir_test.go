@@ -794,4 +794,23 @@ non-uploaded2.tgz:
 			}))
 		})
 	})
+
+	FDescribe("ContainsSymlinks", func() {
+		It("returns true if symlinks are found", func() {
+
+			doesNotExist := filepath.Join("/", "dir", ".blo!bs", "does-not-exist")
+			symlink := filepath.Join("/", "dir", "blobs", "fake-symlink")
+			//fs.Symlink(doesNotExist,	symlink)
+			fs.SetGlob(filepath.Join("/", "dir", "blobs", "**", "*"), []string{symlink})
+			fs.RegisterOpenFile(symlink, &fakesys.FakeFile{
+				Stats: &fakesys.FakeFileStats{
+					FileType: fakesys.FakeFileTypeFile,
+					FileMode: os.FileMode(os.ModeSymlink),
+					SymlinkTarget: doesNotExist,
+				},
+			})
+
+			Expect(blobsDir.ContainsSymlinks()).To(BeTrue())
+		})
+	})
 })

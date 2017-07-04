@@ -7,6 +7,7 @@ import (
 	birellic "github.com/cloudfoundry/bosh-cli/release/license"
 	birelman "github.com/cloudfoundry/bosh-cli/release/manifest"
 	birelpkg "github.com/cloudfoundry/bosh-cli/release/pkg"
+	"fmt"
 )
 
 type release struct {
@@ -158,6 +159,7 @@ func (r *release) Build(devIndicies, finalIndicies ArchiveIndicies) error {
 	}
 
 	for _, pkg := range r.Packages() {
+		fmt.Printf("release.Build %v %v\n", pkg, devIndicies.Packages)
 		err := pkg.Build(devIndicies.Packages, finalIndicies.Packages)
 		if err != nil {
 			return err

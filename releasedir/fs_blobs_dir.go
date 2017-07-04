@@ -15,6 +15,7 @@ import (
 
 	"fmt"
 	bicrypto "github.com/cloudfoundry/bosh-cli/crypto"
+	"strings"
 )
 
 type FSBlobsDir struct {
@@ -99,6 +100,7 @@ func (d FSBlobsDir) Blobs() ([]Blob, error) {
 	var blobs []Blob
 
 	for recPath, rec := range schema {
+		fmt.Printf("recPath: %v %#v\n", d.dirPath, recPath)
 		blobs = append(blobs, Blob{
 			Path:        recPath,
 			Size:        rec.Size,
@@ -118,6 +120,7 @@ func (d FSBlobsDir) SyncBlobs(numOfParallelWorkers int) error {
 		return err
 	}
 
+	fmt.Printf("Enter SyncBlobs %v\n", blobs)
 	if err := d.removeUnknownBlobs(blobs); err != nil {
 		return bosherr.WrapErrorf(err, "Syncing blobs")
 	}
@@ -298,6 +301,32 @@ func (d FSBlobsDir) UploadBlobs() error {
 	}
 
 	return nil
+}
+
+func (d FSBlobsDir) ContainsSymlinks() bool {
+	fmt.Printf("Dirpath %v\n", d.dirPath)
+	files, err := d.fs.RecursiveGlob(filepath.Join(d.dirPath, "**/*"))
+
+	fmt.Printf("Error %v\n", err)
+	fmt.Printf("%v\n", files)
+
+	if err != nil {
+		return false
+	}
+
+	for _, file := range files {
+		fileInfo, _ := d.fs.Lstat(file)
+		fmt.Printf("FileInfo %#v\n", fileInfo)
+		fmt.Printf("FileMode %#v\n", fileInfo.Mode())
+
+		if fileInfo.Mode()&os.ModeSymlink != 0 {
+			res, _ := d.fs.Readlink(file)
+			dir, _ := filepath.Split(res)
+			return filepath.Abs(filepath.EvalSymlinks(dir)) == filepath.Abs(filepath.Dir(d.dirPath)+".blobs")
+		}
+	}
+
+	return false
 }
 
 func (d FSBlobsDir) checkBlobExistence(dstPath string, digest boshcrypto.MultipleDigest) bool {
