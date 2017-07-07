@@ -1,14 +1,16 @@
 package cmd_test
 
 import (
+	flags "github.com/jessevdk/go-flags"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
 	. "github.com/cloudfoundry/bosh-cli/cmd"
 
 	"errors"
-	sysfakes "github.com/cloudfoundry/bosh-utils/system/fakes"
 	"os"
+
+	sysfakes "github.com/cloudfoundry/bosh-utils/system/fakes"
 )
 
 var _ = Describe("FileArg", func() {
@@ -80,6 +82,31 @@ var _ = Describe("FileArg", func() {
 					Expect(err.Error()).To(Equal("Path must not be directory"))
 				})
 			})
+		})
+	})
+
+	Describe("Completion", func() {
+		var (
+			fs  *sysfakes.FakeFileSystem
+			arg FileArg
+		)
+
+		BeforeEach(func() {
+			fs = sysfakes.NewFakeFileSystem()
+			arg = FileArg{FS: fs}
+		})
+
+		It("returns empty array for -", func() {
+			Expect(arg.Complete("-")).To(BeEmpty())
+		})
+
+		It("returns list of filenames if they are matching partial filename", func() {
+			fs.SetGlob("found*", []string{"found_file"})
+			completion := arg.Complete("found")
+			Expect(completion).NotTo(BeEmpty())
+			Expect(completion[0]).To(Equal(flags.Completion{
+				Item: "found_file",
+			}))
 		})
 	})
 })

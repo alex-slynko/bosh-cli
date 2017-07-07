@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	fakesys "github.com/cloudfoundry/bosh-utils/system/fakes"
+	flags "github.com/jessevdk/go-flags"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
@@ -77,6 +78,31 @@ var _ = Describe("VarsFileArg", func() {
 			err := (&arg).UnmarshalFlag("")
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(Equal("Expected file path to be non-empty"))
+		})
+	})
+
+	Describe("Completion", func() {
+		var (
+			fs  *fakesys.FakeFileSystem
+			arg VarsFileArg
+		)
+
+		BeforeEach(func() {
+			fs = fakesys.NewFakeFileSystem()
+			arg = VarsFileArg{FS: fs}
+		})
+
+		It("returns empty array for -", func() {
+			Expect(arg.Complete("-")).To(BeEmpty())
+		})
+
+		It("returns list of filenames if they are matching partial filename", func() {
+			fs.SetGlob("found*", []string{"found_file"})
+			completion := arg.Complete("found")
+			Expect(completion).NotTo(BeEmpty())
+			Expect(completion[0]).To(Equal(flags.Completion{
+				Item: "found_file",
+			}))
 		})
 	})
 })

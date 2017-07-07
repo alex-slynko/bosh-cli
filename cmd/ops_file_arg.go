@@ -1,9 +1,12 @@
 package cmd
 
 import (
+	"fmt"
+
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
 	"github.com/cppforlife/go-patch/patch"
+	flags "github.com/jessevdk/go-flags"
 	"gopkg.in/yaml.v2"
 )
 
@@ -38,4 +41,16 @@ func (a *OpsFileArg) UnmarshalFlag(filePath string) error {
 	(*a).Ops = ops
 
 	return nil
+}
+
+func (a *OpsFileArg) Complete(match string) []flags.Completion {
+	files, _ := a.FS.Glob(match + "*")
+	fmt.Printf("%#v %s", a, match)
+	ret := make([]flags.Completion, len(files))
+
+	for i, v := range files {
+		ret[i].Item = v
+	}
+
+	return ret
 }

@@ -5,6 +5,7 @@ import (
 
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
+	flags "github.com/jessevdk/go-flags"
 )
 
 type VarFileArg struct {
@@ -40,4 +41,15 @@ func (a *VarFileArg) UnmarshalFlag(data string) error {
 	(*a).Vars = StaticVariables{pieces[0]: string(bytes)}
 
 	return nil
+}
+
+func (a *VarFileArg) Complete(match string) []flags.Completion {
+	files, _ := a.FS.Glob(match + "*")
+	ret := make([]flags.Completion, len(files))
+
+	for i, v := range files {
+		ret[i].Item = v
+	}
+
+	return ret
 }

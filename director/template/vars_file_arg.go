@@ -3,6 +3,7 @@ package template
 import (
 	bosherr "github.com/cloudfoundry/bosh-utils/errors"
 	boshsys "github.com/cloudfoundry/bosh-utils/system"
+	flags "github.com/jessevdk/go-flags"
 	"gopkg.in/yaml.v2"
 )
 
@@ -32,4 +33,15 @@ func (a *VarsFileArg) UnmarshalFlag(filePath string) error {
 	(*a).Vars = vars
 
 	return nil
+}
+
+func (a *VarsFileArg) Complete(match string) []flags.Completion {
+	files, _ := a.FS.Glob(match + "*")
+	ret := make([]flags.Completion, len(files))
+
+	for i, v := range files {
+		ret[i].Item = v
+	}
+
+	return ret
 }
