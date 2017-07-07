@@ -13,7 +13,7 @@ github.com/cppforlife/go-semi-semantic/version:576b6af
 github.com/dustin/go-humanize:9436b7a
 github.com/fatih/color:533cd7f
 github.com/hashicorp/go-multierror:d30f099
-github.com/jessevdk/go-flags:4cc2832
+github.com/jessevdk/go-flags:5695738
 github.com/mattn/go-isatty:56b76bd
 github.com/mattn/go-colorable:e8a10dd
 github.com/go-ini/ini:12f418c

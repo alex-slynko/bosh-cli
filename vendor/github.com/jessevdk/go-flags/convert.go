@@ -156,7 +156,14 @@ var FactoryFunc func(interface{})
 func convertUnmarshal(val string, retval reflect.Value) (bool, error) {
 	if retval.Type().NumMethod() > 0 && retval.CanInterface() {
 		if unmarshaler, ok := retval.Interface().(Unmarshaler); ok {
-			FactoryFunc(unmarshaler)
+			if retval.IsNil() {
+				FactoryFunc(unmarshaler)
+				retval.Set(reflect.New(retval.Type().Elem()))
+
+				// Re-assign from the new value
+				unmarshaler = retval.Interface().(Unmarshaler)
+			}
+
 			return true, unmarshaler.UnmarshalFlag(val)
 		}
 	}
